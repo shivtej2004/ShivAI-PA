@@ -5,9 +5,9 @@ import { fileURLToPath } from 'url';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 
-// Polyfills for ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Polyfills for ES Modules (compatible with esbuild CommonJS bundling)
+const _filename = typeof import.meta !== 'undefined' && import.meta.url ? fileURLToPath(import.meta.url) : (typeof __filename !== 'undefined' ? __filename : '');
+const _dirname = typeof import.meta !== 'undefined' && import.meta.url ? path.dirname(_filename) : (typeof __dirname !== 'undefined' ? __dirname : '');
 
 const app = express();
 const PORT = 3000;
