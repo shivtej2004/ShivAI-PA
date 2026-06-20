@@ -53,3 +53,14 @@ export interface UserProfile {
   dailyWaterTarget: number; // in ml
   dailyBudget: number;
 }
+
+export interface KeepNote {
+  id: string;
+  title: string;
+  content: string;
+  color?: string;
+  isPinned: boolean;
+  labels: string[];
+  updatedAt: string;
+}
+

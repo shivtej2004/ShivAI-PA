@@ -194,7 +194,7 @@ export default function ExpensesView({
         <div className="pt-6 border-t border-slate-900 space-y-4">
           <div className="space-y-2">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-450 font-bold text-slate-350 flex items-center gap-1">
+              <span className="text-slate-400 font-bold flex items-center gap-1">
                 <PiggyBank className="w-4 h-4 text-purple-400" />
                 <span>Savings Target Slider Goal</span>
               </span>

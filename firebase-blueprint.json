@@ -1,0 +1,29 @@
+{
+  "entities": {
+    "user_state": {
+      "title": "User State",
+      "description": "The unified productivity, wellness, and financial state of the user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The Firebase Authentication UID."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp indicating when State was last synched."
+        }
+      },
+      "required": [
+        "uid"
+      ]
+    }
+  },
+  "firestore": {
+    "/user_states/{userId}": {
+      "schema": "user_state",
+      "description": "Stores user productivity and wellness backup state synced directly to Cloud."
+    }
+  }
+}

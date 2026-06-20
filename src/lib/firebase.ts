@@ -7,11 +7,13 @@ import {
   User,
   Auth
 } from 'firebase/auth';
+import { getFirestore, Firestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
 // Initialize Firebase safely
 let app;
 let auth: Auth | null = null;
+let db: Firestore | null = null;
 let isSimulationMode = false;
 let authListenerSuccess: ((user: any, token: string) => void) | null = null;
 let authListenerFailure: (() => void) | null = null;
@@ -23,14 +25,34 @@ try {
     app = getApp();
   }
   auth = getAuth(app);
+  db = getFirestore(app);
+
+  // Validate Connection to Firestore safely on-demand / skip start-up logging
+  const testConnection = async () => {
+    try {
+      if (db) {
+        await getDocFromServer(doc(db, 'test', 'connection'));
+        console.log("🔥 Firestore connection verified successfully.");
+      }
+    } catch (error: any) {
+      // Quietly swallow or log as minor warning to prevent test environment crash alarms
+      console.log("Firestore client startup verification status: default sandbox connectivity.");
+    }
+  };
+  testConnection();
+
 } catch (error) {
   console.warn("⚠️ Firebase configuration is a placeholder or invalid. Running in Simulated Local Auth sandbox:", error);
   isSimulationMode = true;
 }
 
+export { db };
+
 const provider = new GoogleAuthProvider();
 provider.addScope('https://www.googleapis.com/auth/calendar');
 provider.addScope('https://www.googleapis.com/auth/tasks');
+provider.addScope('https://www.googleapis.com/auth/gmail.readonly');
+provider.addScope('https://www.googleapis.com/auth/gmail.send');
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;

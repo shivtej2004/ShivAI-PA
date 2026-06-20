@@ -144,7 +144,7 @@ export default function CareerView() {
             <div className="space-y-6 animate-fade-in">
               <div>
                 <h4 className="text-lg font-bold text-white font-sans">Weak Bullet Polish Tool</h4>
-                <p className="text-xs text-slate-450 text-slate-400 mt-1">Convert descriptive chores into metrics-driven professional bullet summaries.</p>
+                <p className="text-xs text-slate-400 mt-1">Convert descriptive chores into metrics-driven professional bullet summaries.</p>
               </div>
 
               <form onSubmit={handleCareerActionSubmit} className="space-y-4">
@@ -178,7 +178,7 @@ export default function CareerView() {
                     {resumeResults && !loading && (
                       <button 
                         onClick={() => handleCopyClipboard(resumeResults)}
-                        className="p-1 px-2 hover:bg-slate-800 rounded transition text-3xs text-slate-450 text-slate-400 flex items-center gap-1 cursor-pointer border border-slate-800"
+                        className="p-1 px-2 hover:bg-slate-800 rounded transition text-3xs text-slate-400 flex items-center gap-1 cursor-pointer border border-slate-800"
                       >
                         {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -206,7 +206,7 @@ export default function CareerView() {
             <div className="space-y-6 animate-fade-in">
               <div>
                 <h4 className="text-lg font-bold text-white font-sans">Custom STAR Prep Case builder</h4>
-                <p className="text-xs text-slate-450 text-slate-400 mt-1">Specify your target corporate title and receive a detailed outline of likely STAR questions.</p>
+                <p className="text-xs text-slate-400 mt-1">Specify your target corporate title and receive a detailed outline of likely STAR questions.</p>
               </div>
 
               <form onSubmit={handleCareerActionSubmit} className="space-y-4">
@@ -280,7 +280,7 @@ export default function CareerView() {
             <div className="space-y-6 animate-fade-in">
               <div>
                 <h4 className="text-lg font-bold text-white font-sans">Outbound Email &amp; LinkedIn Drafting</h4>
-                <p className="text-xs text-slate-450 text-slate-400 mt-1 font-sans">Briefly specify your objective (e.g. follow-up, pitch) and Shiv will draft clean outreach messages.</p>
+                <p className="text-xs text-slate-400 mt-1 font-sans">Briefly specify your objective (e.g. follow-up, pitch) and Shiv will draft clean outreach messages.</p>
               </div>
 
               <form onSubmit={handleCareerActionSubmit} className="space-y-4">

@@ -321,7 +321,7 @@ export default function DashboardView({
               <select
                 value={taskPriority}
                 onChange={(e) => setTaskPriority(e.target.value as any)}
-                className="px-2.5 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-450 text-slate-400 focus:outline-none focus:border-indigo-500 cursor-pointer transition-all"
+                className="px-2.5 rounded-xl bg-slate-950/60 border border-white/5 text-xs text-slate-400 focus:outline-none focus:border-indigo-500 cursor-pointer transition-all"
               >
                 <option value="high">🔥 High</option>
                 <option value="medium">⚡ Mid</option>

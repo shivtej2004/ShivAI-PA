@@ -20,9 +20,26 @@ import {
   AlertCircle,
   TrendingUp,
   UserCheck,
-  Power
+  Power,
+  Mail,
+  Send,
+  Loader2,
+  Pin,
+  Tag,
+  Palette,
+  FileText
 } from 'lucide-react';
-import { googleSignIn, logout, initAuth } from '../lib/firebase';
+import { googleSignIn, logout, initAuth, db } from '../lib/firebase';
+import { KeepNote } from '../types';
+
+interface GoogleEmail {
+  id: string;
+  threadId: string;
+  from: string;
+  subject: string;
+  date: string;
+  snippet: string;
+}
 
 interface GoogleEvent {
   id: string;
@@ -106,7 +123,23 @@ export default function IndianScheduleView({
   // Google items
   const [googleEvents, setGoogleEvents] = useState<GoogleEvent[]>([]);
   const [googleTasks, setGoogleTasks] = useState<GoogleTask[]>([]);
+  const [googleEmails, setGoogleEmails] = useState<GoogleEmail[]>([]);
+  const [newEmailTo, setNewEmailTo] = useState('');
+  const [newEmailSubject, setNewEmailSubject] = useState('');
+  const [newEmailBody, setNewEmailBody] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [emailStatusMessage, setEmailStatusMessage] = useState<string | null>(null);
   const [syncStatus, setSyncStatus] = useState<string>('Sync Offline');
+
+  // Google Keep states
+  const [keepNotes, setKeepNotes] = useState<KeepNote[]>([]);
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteContent, setNoteContent] = useState('');
+  const [noteColor, setNoteColor] = useState('#1e293b'); // default Google Keep dark slate-800 color (safe theme)
+  const [noteLabelsInput, setNoteLabelsInput] = useState('');
+  const [searchKeepQuery, setSearchKeepQuery] = useState('');
+  const [tagToFilter, setTagToFilter] = useState<string | null>(null);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
 
   // Input fields for adding items
   const [newCalTitle, setNewCalTitle] = useState('');
@@ -148,6 +181,7 @@ export default function IndianScheduleView({
         setNeedsAuth(false);
         setSyncStatus('Local Sync Active');
         fetchGoogleData(token, user);
+        fetchKeepNotesFromFirestore(user);
       },
       () => {
         setNeedsAuth(true);
@@ -155,6 +189,7 @@ export default function IndianScheduleView({
         setGoogleToken(null);
         setSyncStatus('Offline Sandbox Mode');
         loadMockWorkspaceData();
+        fetchKeepNotesFromFirestore(null);
       }
     );
     return () => unsub();
@@ -240,6 +275,33 @@ export default function IndianScheduleView({
       { id: 'mt2', title: 'Complete high priority STAR resume logs for Senior IT role', status: 'completed' },
       { id: 'mt3', title: 'Schedule weekly general health checkup session', status: 'needsAction' }
     ]);
+
+    setGoogleEmails([
+      {
+        id: 'm1',
+        threadId: 't1',
+        from: 'Google Talent Bangalore <talent-india@google.com>',
+        subject: 'Onsite Interview Rounds - Senior Frontend Architect Role',
+        date: '2026-06-20T09:12:00Z',
+        snippet: 'Hi Shivtej, we noticed your STAR portfolio resume. We would love to schedule 3 rounds of technical and system architecture deep-dives.'
+      },
+      {
+        id: 'm2',
+        threadId: 't2',
+        from: 'Bangalore Founders Guild <hello@bangalorefounders.org>',
+        subject: 'Tech Mixer & Investor Pitch Invite - Indiranagar',
+        date: '2026-06-19T17:45:00Z',
+        snippet: "Hey Shivtej! Join us tonight's round table on generative AI orchestration structures. 20 founders are discussing Cloud Spanner scalability."
+      },
+      {
+        id: 'm3',
+        threadId: 't3',
+        from: 'JIO Healthcare Cloud Team <dev-support@jio.com>',
+        subject: 'Pranayama App Beta Store Deploy Request',
+        date: '2026-06-18T11:20:00Z',
+        snippet: 'Beta build has been synced with internal clinical wellness pipelines. Please authorize API keys configuration to initiate end-to-end sandbox analysis.'
+      }
+    ]);
   };
 
   // Google APIs Fetcher
@@ -299,6 +361,52 @@ export default function IndianScheduleView({
           })));
         }
       }
+
+      // 3. Fetch Gmail Latest Feed
+      try {
+        const gmailResponse = await fetch(
+          'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5',
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+        const gmailData = await gmailResponse.json();
+        if (gmailData.messages && gmailData.messages.length > 0) {
+          const emailDetails = await Promise.all(
+            gmailData.messages.map(async (msg: any) => {
+              try {
+                const detailResponse = await fetch(
+                  `https://gmail.googleapis.com/gmail/v1/users/me/messages/${msg.id}`,
+                  {
+                    headers: { Authorization: `Bearer ${token}` }
+                  }
+                );
+                const detail = await detailResponse.json();
+                const headers = detail.payload?.headers || [];
+                const fromVal = headers.find((h: any) => h.name.toLowerCase() === 'from')?.value || 'Unknown Sender';
+                const subjectVal = headers.find((h: any) => h.name.toLowerCase() === 'subject')?.value || '(No Subject)';
+                const dateVal = headers.find((h: any) => h.name.toLowerCase() === 'date')?.value || '';
+                return {
+                  id: msg.id,
+                  threadId: msg.threadId,
+                  from: fromVal,
+                  subject: subjectVal,
+                  date: dateVal,
+                  snippet: detail.snippet || ''
+                };
+              } catch (e) {
+                return null;
+              }
+            })
+          );
+          setGoogleEmails(emailDetails.filter(email => email !== null) as GoogleEmail[]);
+        } else {
+          setGoogleEmails([]);
+        }
+      } catch (gmailErr) {
+        console.warn("Could not query Gmail API. This is expected if scopes are missing or not fully approved.", gmailErr);
+      }
+
       setSyncStatus('Real Google Workspace Connected');
     } catch (err: any) {
       console.warn("Could not query Google REST APIs, activating robust mock fallback state:", err);
@@ -320,6 +428,7 @@ export default function IndianScheduleView({
         setNeedsAuth(false);
         setSyncStatus('Sync Session Connected Successfully');
         fetchGoogleData(res.accessToken, res.user);
+        fetchKeepNotesFromFirestore(res.user);
       }
     } catch (err) {
       console.error(err);
@@ -336,6 +445,171 @@ export default function IndianScheduleView({
     setNeedsAuth(true);
     setSyncStatus('Sign Out Recorded');
     loadMockWorkspaceData();
+    // Re-load Keep Notes in sandbox offline preset mode
+    getPresetKeepNotes();
+  };
+
+  // Pre-seed mock / default Keep Notes on startup
+  const getPresetKeepNotes = () => {
+    const presets: KeepNote[] = [
+      {
+        id: '1',
+        title: '💡 Startup Tech Roadmap',
+        content: 'Construct robust offline sync flows optimized for mobile cellular transits in metropolitan areas. Aim for highly responsive, lag-free micro-interactions using Tailwind transitions.',
+        color: '#1e1b4b', // deep indigo
+        isPinned: true,
+        labels: ['Work', 'Tech'],
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        title: '🧘 Brahma Muhurta Sadhana Schedule',
+        content: 'Wake up at 04:30 AM for active Pranayama breathing cycles and Vedic focus tuning. Standardize 4-4-4 Solfeggio frequency ratios before opening tech screens.',
+        color: '#31102f', // deep grape
+        isPinned: true,
+        labels: ['Vedic', 'Wellness'],
+        updatedAt: new Date().toISOString()
+      },
+      {
+        id: '3',
+        title: '🍃 Ayurvedic Tea Steeper Ingredients',
+        content: 'Bring pure mineral water to boil. Slice organic ginger roots finely, bruise small cardamoms, and steep high-quality whole Darjeeling leaves. Strain before warm organic milk addition.',
+        color: '#064e3b', // deep emerald
+        isPinned: false,
+        labels: ['Health', 'Life'],
+        updatedAt: new Date().toISOString()
+      }
+    ];
+    setKeepNotes(presets);
+    localStorage.setItem('shiv_ai_keep_notes', JSON.stringify(presets));
+  };
+
+  // Sync / Save states to local state, localStorage, and Cloud Firestore
+  const saveKeepNotes = async (updatedNotes: KeepNote[], currentUserObj = googleUser) => {
+    setKeepNotes(updatedNotes);
+    localStorage.setItem('shiv_ai_keep_notes', JSON.stringify(updatedNotes));
+
+    if (currentUserObj && currentUserObj.uid && db) {
+      try {
+        const { doc, setDoc } = await import('firebase/firestore');
+        const userStateDocRef = doc(db, 'user_states', currentUserObj.uid);
+        await setDoc(userStateDocRef, {
+          uid: currentUserObj.uid,
+          keepNotes: updatedNotes,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+        console.log("🔥 Successfully authorized and synced Google Keep notes to Cloud Firestore.");
+      } catch (err) {
+        console.warn("Could not save Google Keep state to Cloud Firestore:", err);
+      }
+    }
+  };
+
+  // Fetch Keep notes from Cloud Firestore
+  const fetchKeepNotesFromFirestore = async (currentUserObj: any) => {
+    if (currentUserObj && currentUserObj.uid && db) {
+      try {
+        const { doc, getDoc } = await import('firebase/firestore');
+        const userStateDocRef = doc(db, 'user_states', currentUserObj.uid);
+        const docSnap = await getDoc(userStateDocRef);
+        if (docSnap.exists()) {
+          const cloudData = docSnap.data();
+          if (cloudData && Array.isArray(cloudData.keepNotes)) {
+            setKeepNotes(cloudData.keepNotes);
+            localStorage.setItem('shiv_ai_keep_notes', JSON.stringify(cloudData.keepNotes));
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load Google Keep state from Cloud Firestore:", err);
+      }
+    }
+
+    // LocalStorage Fallback
+    const stored = localStorage.getItem('shiv_ai_keep_notes');
+    if (stored) {
+      try {
+        setKeepNotes(JSON.parse(stored));
+      } catch (e) {
+        getPresetKeepNotes();
+      }
+    } else {
+      getPresetKeepNotes();
+    }
+  };
+
+  // Keep note handlers
+  const handleCreateOrUpdateNote = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!noteContent.trim() && !noteTitle.trim()) return;
+
+    // Parse labels input comma-delimited
+    const parsedLabels = noteLabelsInput
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
+    let updatedList: KeepNote[];
+
+    if (editingNoteId) {
+      // Update
+      updatedList = keepNotes.map(n => n.id === editingNoteId ? {
+        ...n,
+        title: noteTitle.trim() || 'Untitled Note',
+        content: noteContent.trim(),
+        color: noteColor,
+        labels: parsedLabels,
+        updatedAt: new Date().toISOString()
+      } : n);
+      setEditingNoteId(null);
+    } else {
+      // Create
+      const newNote: KeepNote = {
+        id: Math.random().toString(36).substring(2, 11),
+        title: noteTitle.trim() || 'Untitled Note',
+        content: noteContent.trim(),
+        color: noteColor,
+        isPinned: false,
+        labels: parsedLabels,
+        updatedAt: new Date().toISOString()
+      };
+      updatedList = [newNote, ...keepNotes];
+    }
+
+    saveKeepNotes(updatedList);
+    setNoteTitle('');
+    setNoteContent('');
+    setNoteLabelsInput('');
+    setNoteColor('#1e293b');
+    playHarmonySound(528, 0.4);
+  };
+
+  const handleTogglePinNote = (noteId: string) => {
+    const updated = keepNotes.map(n => n.id === noteId ? { ...n, isPinned: !n.isPinned } : n);
+    saveKeepNotes(updated);
+    playHarmonySound(440, 0.2);
+  };
+
+  const handleDeleteKeepNote = (noteId: string) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this note?");
+    if (!confirmDelete) return;
+    const updated = keepNotes.filter(n => n.id !== noteId);
+    saveKeepNotes(updated);
+    playHarmonySound(330, 0.3);
+  };
+
+  const handleEditKeepNote = (note: KeepNote) => {
+    setEditingNoteId(note.id);
+    setNoteTitle(note.title);
+    setNoteContent(note.content);
+    setNoteLabelsInput(note.labels.join(', '));
+    setNoteColor(note.color || '#1e293b');
+    
+    // Scroll composer into view smoothly
+    const composerElement = document.getElementById('keep-composer-view');
+    if (composerElement) {
+      composerElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   // Add Google Calendar Event
@@ -446,6 +720,78 @@ export default function IndianScheduleView({
   const handleToggleTaskLocally = (id: string) => {
     setGoogleTasks(googleTasks.map(t => t.id === id ? { ...t, status: t.status === 'completed' ? 'needsAction' : 'completed' } : t));
     playHarmonySound(528, 0.2);
+  };
+
+  const handleSendGmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newEmailTo.trim() || !newEmailSubject.trim() || !newEmailBody.trim()) return;
+
+    setSendingEmail(true);
+    setEmailStatusMessage(null);
+
+    const emailContent = `To: ${newEmailTo}\r\nSubject: ${newEmailSubject}\r\nContent-Type: text/plain; charset=utf-8\r\n\r\n${newEmailBody}`;
+    
+    // Safely encode to base64url compliance
+    const encodedRaw = btoa(unescape(encodeURIComponent(emailContent)))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    try {
+      if (!googleToken || googleToken === 'mock-google-oauth-access-token-sandbox-mode') {
+        // Mock success dispatch
+        await new Promise(resolve => setTimeout(resolve, 800));
+        const mockNewEmail: GoogleEmail = {
+          id: Math.random().toString(),
+          threadId: Math.random().toString(),
+          from: `My Workspace <kanaseshivtej312@gmail.com>`,
+          subject: newEmailSubject,
+          date: new Date().toISOString(),
+          snippet: newEmailBody
+        };
+        setGoogleEmails([mockNewEmail, ...googleEmails]);
+        setNewEmailTo('');
+        setNewEmailSubject('');
+        setNewEmailBody('');
+        setEmailStatusMessage('✓ Local sandbox email simulated successfully!');
+        playHarmonySound(528, 1.5);
+      } else {
+        const response = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${googleToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ raw: encodedRaw })
+        });
+
+        if (!response.ok) {
+          throw new Error('Gmail sending failed on remote portal api.');
+        }
+
+        setEmailStatusMessage('✓ Email sent successfully through Google Workspace!');
+        setNewEmailTo('');
+        setNewEmailSubject('');
+        setNewEmailBody('');
+        playHarmonySound(528, 1.5);
+
+        // Refresh Gmail Feed
+        fetchGoogleData(googleToken, googleUser);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setEmailStatusMessage(`❌ Error: ${err.message || 'Transmission failed.'}`);
+    } finally {
+      setSendingEmail(false);
+      setTimeout(() => setEmailStatusMessage(null), 5000);
+    }
+  };
+
+  const handleDeleteEmailLocally = (id: string, subject: string) => {
+    const confirmation = window.confirm(`Dismiss email "${subject}" from current inbox list?`);
+    if (!confirmation) return;
+    setGoogleEmails(googleEmails.filter(m => m.id !== id));
+    playHarmonySound(330, 0.5);
   };
 
   // Custom schedule slot operations
@@ -1063,6 +1409,513 @@ export default function IndianScheduleView({
             </form>
           </div>
 
+        </div>
+
+        {/* Row 3: Gmail Workspace Center */}
+        <div className="p-6 rounded-3xl border border-slate-900 bg-slate-950/40 backdrop-blur-md space-y-6 mt-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
+            <div>
+              <span className="text-3xs uppercase tracking-wider text-slate-500 font-bold block flex items-center gap-1">
+                <Mail className="w-3.5 h-3.5 text-amber-400" />
+                <span>Google Gmail Hub</span>
+              </span>
+              <p className="text-4xs text-slate-400 mt-1 leading-snug">
+                Manage your executive pipeline. Draft or search client correspondence directly.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wide uppercase ${
+                googleToken ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'bg-slate-900 text-slate-500'
+              }`}>
+                {googleToken ? 'Gmail Live API' : 'Sandbox Simulated'}
+              </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Left Multi-Column: Gmail Live Inbox Feed */}
+            <div className="lg:col-span-7 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-2xs font-bold text-white uppercase tracking-wider">Workspace Inbox</h4>
+                <span className="text-4xs text-slate-500 font-mono italic">Showing {googleEmails.length} messages</span>
+              </div>
+
+              <div className="space-y-2.5 max-h-[350px] overflow-y-auto pr-1">
+                {googleEmails.length === 0 ? (
+                  <div className="text-center py-10 border border-dashed border-slate-900 rounded-2xl bg-slate-950/20">
+                    <Mail className="w-8 h-8 text-slate-700 mx-auto mb-2" />
+                    <p className="text-slate-550 text-2xs italic">Your Workspace inbox feed is empty or initializing.</p>
+                  </div>
+                ) : (
+                  googleEmails.map((email) => {
+                    // Extract name from "Name <email>" format safely
+                    const fromClean = email.from.replace(/<.*>/, '').trim() || email.from;
+                    const fromEmailOnly = email.from.match(/<(.*)>/)?.[1] || '';
+                    const dateFormatted = email.date ? new Date(email.date).toLocaleString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+                    return (
+                      <div 
+                        key={email.id}
+                        className="p-3.5 rounded-2xl bg-slate-900/40 border border-slate-850 hover:border-slate-800 hover:bg-slate-900/60 transition group relative"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-200 group-hover:text-amber-400 transition truncate">{fromClean}</span>
+                              {fromEmailOnly && (
+                                <span className="text-[10px] text-slate-500 font-mono truncate hidden sm:inline">&lt;{fromEmailOnly}&gt;</span>
+                              )}
+                            </div>
+                            <h5 className="text-2xs font-semibold text-white mt-1 leading-tight tracking-normal">{email.subject}</h5>
+                            <p className="text-3xs text-slate-400 mt-1 lines-clamp-3 leading-relaxed font-sans">{email.snippet}</p>
+                            <span className="text-4xs text-slate-500 font-mono block mt-2">{dateFormatted}</span>
+                          </div>
+                          
+                          <button
+                            onClick={() => handleDeleteEmailLocally(email.id, email.subject)}
+                            className="p-1 rounded text-slate-600 hover:text-red-400 hover:bg-slate-905 transition shrink-0 cursor-pointer"
+                            title="Dismiss email from view"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Right Multi-Column: Interactive Gmail Composer */}
+            <div className="lg:col-span-5 p-5 rounded-2xl bg-slate-900/20 border border-slate-850 space-y-4 font-sans">
+              <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                <span className="text-2xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                  <Send className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Outbox Composer</span>
+                </span>
+                <span className="text-4xs text-slate-500 font-mono">OAuth Shielded</span>
+              </div>
+
+              <form onSubmit={handleSendGmail} className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">To (Recipient Email)</label>
+                  <input 
+                    type="email" 
+                    placeholder="e.g. coworker@company.com"
+                    value={newEmailTo}
+                    onChange={(e) => setNewEmailTo(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-indigo-500/50 transition font-sans"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Subject Heading</label>
+                  <input 
+                    type="text" 
+                    placeholder="Professional tech roadmap catchup..."
+                    value={newEmailSubject}
+                    onChange={(e) => setNewEmailSubject(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-indigo-500/50 transition font-sans"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Message Correspondence Body</label>
+                  <textarea 
+                    rows={4}
+                    placeholder="Draft clean bulleted STAR executive updates here..."
+                    value={newEmailBody}
+                    onChange={(e) => setNewEmailBody(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-indigo-500/50 transition font-sans resize-none h-28"
+                    required
+                  />
+                </div>
+
+                {emailStatusMessage && (
+                  <div className={`p-2.5 rounded-lg border text-4xs font-sans leading-snug animate-fade-in ${
+                    emailStatusMessage.startsWith('❌') 
+                      ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' 
+                      : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                  }`}>
+                    {emailStatusMessage}
+                  </div>
+                )}
+
+                <button 
+                  type="submit"
+                  disabled={sendingEmail}
+                  className="w-full py-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-40 text-white font-bold rounded-xl text-3xs font-sans cursor-pointer flex items-center justify-center gap-1.5 transition shadow-[0_4px_15px_rgba(99,102,241,0.2)] disabled:cursor-not-allowed uppercase tracking-wider"
+                >
+                  {sendingEmail ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>Transmitting via OAuth...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Transmit Message</span>
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {/* Row 4: Google Keep Workspace Hub */}
+        <div className="p-6 rounded-3xl border border-slate-900 bg-slate-950/40 backdrop-blur-md space-y-6 mt-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-white/5 pb-4">
+            <div>
+              <span className="text-3xs uppercase tracking-wider text-slate-500 font-bold block flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5 text-amber-500" />
+                <span>Google Keep Notes Center</span>
+              </span>
+              <p className="text-4xs text-slate-400 mt-1 leading-snug">
+                Organize thoughts, pin strategic roadmaps, and tag atomic habits. Authorized Firestore auto-backup preserves note state securely.
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wide uppercase ${
+                googleUser ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-900 text-slate-500'
+              }`}>
+                {googleUser ? 'Firestore Backup Active' : 'Sandbox Simulated'}
+              </span>
+            </div>
+          </div>
+
+          {/* Quick keep filter controls */}
+          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/20 p-4 rounded-2xl border border-slate-900">
+            <div className="flex items-center gap-2 w-full sm:w-auto max-w-md">
+              <span className="text-slate-550 shrink-0 select-none text-[10px]">🔍</span>
+              <input 
+                type="text" 
+                placeholder="Search notes content..." 
+                value={searchKeepQuery}
+                onChange={(e) => setSearchKeepQuery(e.target.value)}
+                className="w-full bg-transparent text-2xs text-white focus:outline-none placeholder:text-slate-650"
+              />
+              {searchKeepQuery && (
+                <button onClick={() => setSearchKeepQuery('')} className="text-4xs text-indigo-400 hover:text-white cursor-pointer px-1">
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Filter tags pill row */}
+            <div className="flex items-center gap-1.5 flex-wrap overflow-x-auto">
+              <span className="text-4xs text-slate-550 font-bold uppercase tracking-wider">Filter Label:</span>
+              <button 
+                onClick={() => setTagToFilter(null)}
+                className={`px-2 py-0.5 rounded-full text-[10px] cursor-pointer transition ${
+                  !tagToFilter ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 font-semibold' : 'bg-slate-900 text-slate-500 border border-transparent'
+                }`}
+              >
+                All States
+              </button>
+              {Array.from(new Set(keepNotes.flatMap(n => n.labels || []))).map(lbl => (
+                <button 
+                  key={lbl}
+                  onClick={() => setTagToFilter(lbl)}
+                  className={`px-2 py-0.5 rounded-full text-[10px] transition cursor-pointer ${
+                    tagToFilter === lbl ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 font-semibold' : 'bg-slate-900 hover:bg-slate-850 text-slate-400'
+                  }`}
+                >
+                  #{lbl}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* Note Composer Panel (Left, span 4) */}
+            <div id="keep-composer-view" className="lg:col-span-4 p-5 rounded-2xl bg-slate-900/20 border border-slate-850 space-y-4 font-sans focus-within:border-slate-750 transition duration-300">
+              <span className="text-2xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5 text-amber-500" />
+                <span>{editingNoteId ? 'Update Document' : 'Draft Keep Note'}</span>
+              </span>
+
+              <form onSubmit={handleCreateOrUpdateNote} className="space-y-3">
+                <div className="space-y-1">
+                  <input 
+                    type="text" 
+                    placeholder="Title Heading (optional)"
+                    value={noteTitle}
+                    onChange={(e) => setNoteTitle(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-amber-500/30 transition font-sans font-semibold"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <textarea 
+                    rows={4}
+                    placeholder="Take a note context..."
+                    value={noteContent}
+                    onChange={(e) => setNoteContent(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-amber-500/30 transition font-sans resize-none h-24"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Tags / Labels (comma-separated)</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. Work, Wellness, Tech"
+                    value={noteLabelsInput}
+                    onChange={(e) => setNoteLabelsInput(e.target.value)}
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-white placeholder:text-slate-650 focus:outline-none transition font-sans font-mono"
+                  />
+                </div>
+
+                {/* Color Chooser */}
+                <div className="space-y-1">
+                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Note Canvas Tone</label>
+                  <div className="flex flex-wrap items-center gap-2 py-1">
+                    {[
+                      { hex: '#1e293b', name: 'Slate' },
+                      { hex: '#1e1b4b', name: 'Indigo' },
+                      { hex: '#064e3b', name: 'Emerald' },
+                      { hex: '#31102f', name: 'Plum' },
+                      { hex: '#7c2d12', name: 'Amber' },
+                      { hex: '#450a0a', name: 'Crimson' }
+                    ].map(col => (
+                      <button
+                        key={col.hex}
+                        type="button"
+                        onClick={() => setNoteColor(col.hex)}
+                        title={col.name}
+                        className={`w-5 h-5 rounded-full border transition hover:scale-110 cursor-pointer ${
+                          noteColor === col.hex ? 'border-white scale-110 shadow-lg' : 'border-slate-800'
+                        }`}
+                        style={{ backgroundColor: col.hex }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <button 
+                    type="submit"
+                    className="flex-1 py-1.5 bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500 hover:text-slate-950 font-bold rounded-xl text-[10px] font-sans cursor-pointer flex items-center justify-center gap-1 transition uppercase tracking-wider"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>{editingNoteId ? 'Update Keep' : 'Pin to Keep'}</span>
+                  </button>
+                  {editingNoteId && (
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        setEditingNoteId(null);
+                        setNoteTitle('');
+                        setNoteContent('');
+                        setNoteLabelsInput('');
+                        setNoteColor('#1e293b');
+                      }}
+                      className="px-2.5 py-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 font-bold rounded-xl text-[10px] cursor-pointer transition uppercase"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Note Grid View Panel (Right, span 8) */}
+            <div className="lg:col-span-8 space-y-4">
+              <div className="flex items-center justify-between">
+                <h4 className="text-2xs font-bold text-white uppercase tracking-wider">Keep Notebook Items</h4>
+                <div className="text-4xs text-slate-500 font-mono italic flex items-center gap-2">
+                  <span>{keepNotes.filter(n => n.isPinned).length} pinned</span>
+                  <span>•</span>
+                  <span>{keepNotes.length} total</span>
+                </div>
+              </div>
+
+              {/* Grid content */}
+              {(() => {
+                // Filter the list based on search term AND selected category
+                const filtered = keepNotes.filter(n => {
+                  const query = searchKeepQuery.toLowerCase().trim();
+                  const matchesSearch = !query || 
+                    n.title.toLowerCase().includes(query) || 
+                    n.content.toLowerCase().includes(query) || 
+                    (n.labels || []).some(l => l.toLowerCase().includes(query));
+                  
+                  const matchesTag = !tagToFilter || (n.labels || []).some(l => l.toLowerCase() === tagToFilter.toLowerCase());
+                  
+                  return matchesSearch && matchesTag;
+                });
+
+                // Segregate pinned and normal notes
+                const pinnedNotes = filtered.filter(n => n.isPinned);
+                const normalNotes = filtered.filter(n => !n.isPinned);
+
+                if (filtered.length === 0) {
+                  return (
+                    <div className="text-center py-16 border border-dashed border-slate-900 rounded-2xl bg-slate-950/20">
+                      <FileText className="w-10 h-10 text-slate-700 mx-auto mb-2" />
+                      <p className="text-slate-550 text-2xs italic">No matching notes found inside your Google Keep cabinet.</p>
+                      {tagToFilter || searchKeepQuery ? (
+                        <button 
+                          onClick={() => { setTagToFilter(null); setSearchKeepQuery(''); }}
+                          className="mt-2 text-3xs text-indigo-400 hover:underline cursor-pointer"
+                        >
+                          Clear active search filters
+                        </button>
+                      ) : null}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-6 max-h-[480px] overflow-y-auto pr-1">
+                    {/* Pinned section */}
+                    {pinnedNotes.length > 0 && (
+                      <div className="space-y-2.5">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block font-mono">Pinned</span>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {pinnedNotes.map((note) => (
+                            <div 
+                              key={note.id}
+                              style={{ backgroundColor: note.color || '#1e293b' }}
+                              className="p-4 rounded-2xl border border-white/5 shadow-md flex flex-col justify-between group relative transition duration-300 hover:border-white/10 hover:shadow-xl hover:-translate-y-0.5"
+                            >
+                              <div className="min-h-[100px]">
+                                <div className="flex items-start justify-between gap-2 border-b border-white/5 pb-2 mb-2">
+                                  <h5 className="text-[13px] font-bold text-white tracking-tight pr-5">{note.title}</h5>
+                                  <button
+                                    onClick={() => handleTogglePinNote(note.id)}
+                                    className="absolute top-3.5 right-3.5 text-amber-400 hover:text-white transition cursor-pointer p-0.5"
+                                    title="Unpin Note"
+                                  >
+                                    <Pin className="w-3.5 h-3.5 fill-amber-400" />
+                                  </button>
+                                </div>
+                                <p className="text-2xs text-slate-200 mt-1.5 whitespace-pre-line leading-relaxed max-h-24 overflow-y-auto pr-1 font-sans">
+                                  {note.content}
+                                </p>
+                              </div>
+
+                              <div className="mt-4 pt-2.5 border-t border-white/10 flex flex-col gap-2">
+                                {/* Label pills */}
+                                {note.labels && note.labels.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {note.labels.map(lbl => (
+                                      <span 
+                                        key={lbl} 
+                                        className="px-1.5 py-0.5 rounded text-[8px] bg-white/10 text-white font-mono hover:bg-white/25 transition cursor-pointer"
+                                        onClick={() => setTagToFilter(lbl)}
+                                      >
+                                        #{lbl}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 pt-1">
+                                  <span>{new Date(note.updatedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                                  <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition duration-300">
+                                    <button 
+                                      onClick={() => handleEditKeepNote(note)}
+                                      className="p-1 hover:bg-white/10 rounded transition cursor-pointer text-2xs" 
+                                      title="Edit Note"
+                                    >
+                                      🖊️
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDeleteKeepNote(note.id)}
+                                      className="p-1 hover:bg-white/10 rounded transition cursor-pointer text-2xs" 
+                                      title="Delete Note"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Unpinned section */}
+                    {normalNotes.length > 0 && (
+                      <div className="space-y-2.5">
+                        {pinnedNotes.length > 0 && (
+                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block font-mono pt-2">Others</span>
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {normalNotes.map((note) => (
+                            <div 
+                              key={note.id}
+                              style={{ backgroundColor: note.color || '#1e293b' }}
+                              className="p-4 rounded-2xl border border-white/5 shadow-md flex flex-col justify-between group relative transition duration-300 hover:border-white/10 hover:shadow-xl hover:-translate-y-0.5"
+                            >
+                              <div className="min-h-[100px]">
+                                <div className="flex items-start justify-between gap-2 border-b border-white/5 pb-2 mb-2">
+                                  <h5 className="text-[13px] font-bold text-white tracking-tight pr-5">{note.title}</h5>
+                                  <button
+                                    onClick={() => handleTogglePinNote(note.id)}
+                                    className="absolute top-3.5 right-3.5 text-slate-400 hover:text-white transition cursor-pointer p-0.5"
+                                    title="Pin Note"
+                                  >
+                                    <Pin className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                                <p className="text-2xs text-slate-200 mt-1.5 whitespace-pre-line leading-relaxed max-h-24 overflow-y-auto pr-1 font-sans">
+                                  {note.content}
+                                </p>
+                              </div>
+
+                              <div className="mt-4 pt-2.5 border-t border-white/10 flex flex-col gap-2">
+                                {/* Label pills */}
+                                {note.labels && note.labels.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {note.labels.map(lbl => (
+                                      <span 
+                                        key={lbl} 
+                                        className="px-1.5 py-0.5 rounded text-[8px] bg-white/10 text-white font-mono hover:bg-white/25 transition cursor-pointer"
+                                        onClick={() => setTagToFilter(lbl)}
+                                      >
+                                        #{lbl}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                                <div className="flex items-center justify-between text-[9px] font-mono text-slate-400 pt-1">
+                                  <span>{new Date(note.updatedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                                  <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition duration-300">
+                                    <button 
+                                      onClick={() => handleEditKeepNote(note)}
+                                      className="p-1 hover:bg-white/10 rounded transition cursor-pointer text-2xs" 
+                                      title="Edit Note"
+                                    >
+                                      🖊️
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDeleteKeepNote(note.id)}
+                                      className="p-1 hover:bg-white/10 rounded transition cursor-pointer text-2xs" 
+                                      title="Delete Note"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         </div>
 
       </div>
