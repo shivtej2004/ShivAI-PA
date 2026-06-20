@@ -878,7 +878,7 @@ export default function IndianScheduleView({
 
           {/* Sign In button or signed in user metrics */}
           {needsAuth ? (
-            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-850 space-y-3">
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
               <p className="text-center text-xs text-slate-400 leading-relaxed font-sans">
                 You are currently running in **Offline Local Sandbox**. Connect Google to activate live rest integrations.
               </p>
@@ -937,7 +937,7 @@ export default function IndianScheduleView({
               className={`p-4 rounded-2xl border transition text-left cursor-pointer ${
                 currency === 'INR'
                   ? 'bg-orange-500/10 border-orange-500/30 text-orange-400'
-                  : 'bg-slate-900/40 border-slate-850 hover:bg-slate-900'
+                  : 'bg-slate-900/40 border-slate-800 hover:bg-slate-900'
               }`}
             >
               <span className="text-2xs uppercase text-slate-500 block font-bold">Standard Indian</span>
@@ -950,7 +950,7 @@ export default function IndianScheduleView({
               className={`p-4 rounded-2xl border transition text-left cursor-pointer ${
                 currency === 'USD'
                   ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400'
-                  : 'bg-slate-900/40 border-slate-850 hover:bg-slate-900'
+                  : 'bg-slate-900/40 border-slate-800 hover:bg-slate-900'
               }`}
             >
               <span className="text-2xs uppercase text-slate-500 block font-bold">Standard Global</span>
@@ -1016,7 +1016,7 @@ export default function IndianScheduleView({
 
           <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
             {INDIAN_HOLIDAYS_2026.map((hol, i) => (
-              <div key={i} className="p-3 rounded-xl bg-slate-900/40 border border-slate-850 flex items-center justify-between text-xs">
+              <div key={i} className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 flex items-center justify-between text-xs">
                 <div>
                   <span className="font-semibold block text-slate-100">{hol.name}</span>
                   <span className="text-4xs text-orange-400">{hol.type}</span>
@@ -1062,7 +1062,7 @@ export default function IndianScheduleView({
                 className={`p-4 rounded-2xl border transition duration-150 ${
                   sl.active 
                     ? 'bg-orange-500/15 border-orange-500 shadow-[0_4px_16px_rgba(249,115,22,0.1)]' 
-                    : 'bg-slate-900/30 border-slate-850 hover:border-slate-800'
+                    : 'bg-slate-900/30 border-slate-800 hover:border-slate-800'
                 }`}
               >
                 <div className="flex justify-between items-start gap-4">
@@ -1105,7 +1105,7 @@ export default function IndianScheduleView({
                     {slots.length > 3 && (
                       <button
                         onClick={() => handleRemoveSlot(sl.id)}
-                        className="text-slate-650 text-slate-500 hover:text-rose-400 hover:-translate-y-0.5 transition cursor-pointer"
+                        className="text-slate-500 text-slate-500 hover:text-rose-400 hover:-translate-y-0.5 transition cursor-pointer"
                       >
                         ✕
                       </button>
@@ -1117,13 +1117,13 @@ export default function IndianScheduleView({
           </div>
 
           {/* Quick Slot add form */}
-          <form onSubmit={handleAddSlot} className="p-4 rounded-2xl bg-slate-900/50 border border-slate-850 flex flex-col sm:flex-row gap-3">
+          <form onSubmit={handleAddSlot} className="p-4 rounded-2xl bg-slate-900/50 border border-slate-800 flex flex-col sm:flex-row gap-3">
             <input 
               type="text" 
               placeholder="e.g. 17:00 - 18:00"
               value={newSlotTime}
               onChange={(e) => setNewSlotTime(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-550 flex-1 min-w-0" 
+              className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-400 flex-1 min-w-0" 
               required
             />
             <input 
@@ -1131,7 +1131,7 @@ export default function IndianScheduleView({
               placeholder="Custom Slot Name"
               value={newSlotName}
               onChange={(e) => setNewSlotName(e.target.value)}
-              className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-550 flex-1 min-w-0" 
+              className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white placeholder:text-slate-400 flex-1 min-w-0" 
               required
             />
             <button 
@@ -1182,7 +1182,7 @@ export default function IndianScheduleView({
                     className={`py-1 rounded border transition ${
                       selectedChaiType === ch 
                         ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' 
-                        : 'bg-slate-900/60 border-slate-850 text-slate-400'
+                        : 'bg-slate-900/60 border-slate-800 text-slate-400'
                     }`}
                   >
                     {ch.toUpperCase()}
@@ -1286,7 +1286,7 @@ export default function IndianScheduleView({
             {/* List Events */}
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {googleEvents.length === 0 ? (
-                <p className="text-slate-550 text-3xs italic py-6 text-center">No upcoming workspace events referenced from calendar.</p>
+                <p className="text-slate-400 text-3xs italic py-6 text-center">No upcoming workspace events referenced from calendar.</p>
               ) : (
                 googleEvents.map((ev) => {
                   const evDate = ev.start?.dateTime || ev.start?.date || '';
@@ -1294,7 +1294,7 @@ export default function IndianScheduleView({
                   return (
                     <div 
                       key={ev.id}
-                      className="p-3 rounded-xl bg-slate-900/40 border border-slate-850 hover:border-slate-800 transition flex items-center justify-between gap-3 text-xs"
+                      className="p-3 rounded-xl bg-slate-900/40 border border-slate-800 hover:border-slate-800 transition flex items-center justify-between gap-3 text-xs"
                     >
                       <div className="min-w-0 flex-1">
                         <span className="text-slate-205 text-slate-200 font-semibold block truncate leading-tight">{ev.summary}</span>
@@ -1314,13 +1314,13 @@ export default function IndianScheduleView({
             </div>
 
             {/* Add calendar event form */}
-            <form onSubmit={handleAddCalendarEvent} className="p-3 bg-slate-900/40 rounded-2xl border border-slate-850 space-y-2">
+            <form onSubmit={handleAddCalendarEvent} className="p-3 bg-slate-900/40 rounded-2xl border border-slate-800 space-y-2">
               <input 
                 type="text" 
                 placeholder="New Google Calendar Event" 
                 value={newCalTitle}
                 onChange={(e) => setNewCalTitle(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-550 focus:outline-none"
+                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-400 focus:outline-none"
                 required
               />
               <div className="grid grid-cols-2 gap-2">
@@ -1361,12 +1361,12 @@ export default function IndianScheduleView({
             {/* Tasks list */}
             <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
               {googleTasks.length === 0 ? (
-                <p className="text-slate-550 text-3xs italic py-6 text-center">No tasks listed in linked Google Workspace lists.</p>
+                <p className="text-slate-400 text-3xs italic py-6 text-center">No tasks listed in linked Google Workspace lists.</p>
               ) : (
                 googleTasks.map((t) => (
                   <div 
                     key={t.id}
-                    className={`p-3 rounded-xl bg-slate-900/40 border border-slate-850 hover:border-slate-800 transition flex items-center justify-between gap-3 text-xs ${
+                    className={`p-3 rounded-xl bg-slate-900/40 border border-slate-800 hover:border-slate-800 transition flex items-center justify-between gap-3 text-xs ${
                       t.status === 'completed' ? 'opacity-50 line-through' : ''
                     }`}
                   >
@@ -1391,13 +1391,13 @@ export default function IndianScheduleView({
             </div>
 
             {/* Add Google Task form */}
-            <form onSubmit={handleAddGoogleTask} className="p-3 bg-slate-900/40 rounded-2xl border border-slate-850 space-y-2">
+            <form onSubmit={handleAddGoogleTask} className="p-3 bg-slate-900/40 rounded-2xl border border-slate-800 space-y-2">
               <input 
                 type="text" 
                 placeholder="New Google Task Title" 
                 value={newTaskTitle}
                 onChange={(e) => setNewTaskTitle(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-550 focus:outline-none"
+                className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-400 focus:outline-none"
                 required
               />
               <button 
@@ -1445,7 +1445,7 @@ export default function IndianScheduleView({
                 {googleEmails.length === 0 ? (
                   <div className="text-center py-10 border border-dashed border-slate-900 rounded-2xl bg-slate-950/20">
                     <Mail className="w-8 h-8 text-slate-700 mx-auto mb-2" />
-                    <p className="text-slate-550 text-2xs italic">Your Workspace inbox feed is empty or initializing.</p>
+                    <p className="text-slate-400 text-2xs italic">Your Workspace inbox feed is empty or initializing.</p>
                   </div>
                 ) : (
                   googleEmails.map((email) => {
@@ -1457,7 +1457,7 @@ export default function IndianScheduleView({
                     return (
                       <div 
                         key={email.id}
-                        className="p-3.5 rounded-2xl bg-slate-900/40 border border-slate-850 hover:border-slate-800 hover:bg-slate-900/60 transition group relative"
+                        className="p-3.5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-slate-800 hover:bg-slate-900/60 transition group relative"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">
@@ -1488,7 +1488,7 @@ export default function IndianScheduleView({
             </div>
 
             {/* Right Multi-Column: Interactive Gmail Composer */}
-            <div className="lg:col-span-5 p-5 rounded-2xl bg-slate-900/20 border border-slate-850 space-y-4 font-sans">
+            <div className="lg:col-span-5 p-5 rounded-2xl bg-slate-900/20 border border-slate-800 space-y-4 font-sans">
               <div className="flex items-center justify-between border-b border-white/5 pb-2">
                 <span className="text-2xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                   <Send className="w-3.5 h-3.5 text-indigo-400" />
@@ -1499,37 +1499,37 @@ export default function IndianScheduleView({
 
               <form onSubmit={handleSendGmail} className="space-y-3">
                 <div className="space-y-1">
-                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">To (Recipient Email)</label>
+                  <label className="text-4xs uppercase tracking-wider text-slate-400 font-bold block">To (Recipient Email)</label>
                   <input 
                     type="email" 
                     placeholder="e.g. coworker@company.com"
                     value={newEmailTo}
                     onChange={(e) => setNewEmailTo(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-indigo-500/50 transition font-sans"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 transition font-sans"
                     required
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Subject Heading</label>
+                  <label className="text-4xs uppercase tracking-wider text-slate-400 font-bold block">Subject Heading</label>
                   <input 
                     type="text" 
                     placeholder="Professional tech roadmap catchup..."
                     value={newEmailSubject}
                     onChange={(e) => setNewEmailSubject(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-indigo-500/50 transition font-sans"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 transition font-sans"
                     required
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Message Correspondence Body</label>
+                  <label className="text-4xs uppercase tracking-wider text-slate-400 font-bold block">Message Correspondence Body</label>
                   <textarea 
                     rows={4}
                     placeholder="Draft clean bulleted STAR executive updates here..."
                     value={newEmailBody}
                     onChange={(e) => setNewEmailBody(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-indigo-500/50 transition font-sans resize-none h-28"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500/50 transition font-sans resize-none h-28"
                     required
                   />
                 </div>
@@ -1591,13 +1591,13 @@ export default function IndianScheduleView({
           {/* Quick keep filter controls */}
           <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-950/20 p-4 rounded-2xl border border-slate-900">
             <div className="flex items-center gap-2 w-full sm:w-auto max-w-md">
-              <span className="text-slate-550 shrink-0 select-none text-[10px]">🔍</span>
+              <span className="text-slate-400 shrink-0 select-none text-[10px]">🔍</span>
               <input 
                 type="text" 
                 placeholder="Search notes content..." 
                 value={searchKeepQuery}
                 onChange={(e) => setSearchKeepQuery(e.target.value)}
-                className="w-full bg-transparent text-2xs text-white focus:outline-none placeholder:text-slate-650"
+                className="w-full bg-transparent text-2xs text-white focus:outline-none placeholder:text-slate-500"
               />
               {searchKeepQuery && (
                 <button onClick={() => setSearchKeepQuery('')} className="text-4xs text-indigo-400 hover:text-white cursor-pointer px-1">
@@ -1608,7 +1608,7 @@ export default function IndianScheduleView({
 
             {/* Filter tags pill row */}
             <div className="flex items-center gap-1.5 flex-wrap overflow-x-auto">
-              <span className="text-4xs text-slate-550 font-bold uppercase tracking-wider">Filter Label:</span>
+              <span className="text-4xs text-slate-400 font-bold uppercase tracking-wider">Filter Label:</span>
               <button 
                 onClick={() => setTagToFilter(null)}
                 className={`px-2 py-0.5 rounded-full text-[10px] cursor-pointer transition ${
@@ -1622,7 +1622,7 @@ export default function IndianScheduleView({
                   key={lbl}
                   onClick={() => setTagToFilter(lbl)}
                   className={`px-2 py-0.5 rounded-full text-[10px] transition cursor-pointer ${
-                    tagToFilter === lbl ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 font-semibold' : 'bg-slate-900 hover:bg-slate-850 text-slate-400'
+                    tagToFilter === lbl ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40 font-semibold' : 'bg-slate-900 hover:bg-slate-800 text-slate-400'
                   }`}
                 >
                   #{lbl}
@@ -1633,7 +1633,7 @@ export default function IndianScheduleView({
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Note Composer Panel (Left, span 4) */}
-            <div id="keep-composer-view" className="lg:col-span-4 p-5 rounded-2xl bg-slate-900/20 border border-slate-850 space-y-4 font-sans focus-within:border-slate-750 transition duration-300">
+            <div id="keep-composer-view" className="lg:col-span-4 p-5 rounded-2xl bg-slate-900/20 border border-slate-800 space-y-4 font-sans focus-within:border-slate-700 transition duration-300">
               <span className="text-2xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
                 <Palette className="w-3.5 h-3.5 text-amber-500" />
                 <span>{editingNoteId ? 'Update Document' : 'Draft Keep Note'}</span>
@@ -1646,7 +1646,7 @@ export default function IndianScheduleView({
                     placeholder="Title Heading (optional)"
                     value={noteTitle}
                     onChange={(e) => setNoteTitle(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-amber-500/30 transition font-sans font-semibold"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/30 transition font-sans font-semibold"
                   />
                 </div>
 
@@ -1656,25 +1656,25 @@ export default function IndianScheduleView({
                     placeholder="Take a note context..."
                     value={noteContent}
                     onChange={(e) => setNoteContent(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-650 focus:outline-none focus:border-amber-500/30 transition font-sans resize-none h-24"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-2xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-500/30 transition font-sans resize-none h-24"
                     required
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Tags / Labels (comma-separated)</label>
+                  <label className="text-4xs uppercase tracking-wider text-slate-400 font-bold block">Tags / Labels (comma-separated)</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Work, Wellness, Tech"
                     value={noteLabelsInput}
                     onChange={(e) => setNoteLabelsInput(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-white placeholder:text-slate-650 focus:outline-none transition font-sans font-mono"
+                    className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] text-white placeholder:text-slate-500 focus:outline-none transition font-sans font-mono"
                   />
                 </div>
 
                 {/* Color Chooser */}
                 <div className="space-y-1">
-                  <label className="text-4xs uppercase tracking-wider text-slate-550 font-bold block">Note Canvas Tone</label>
+                  <label className="text-4xs uppercase tracking-wider text-slate-400 font-bold block">Note Canvas Tone</label>
                   <div className="flex flex-wrap items-center gap-2 py-1">
                     {[
                       { hex: '#1e293b', name: 'Slate' },
@@ -1759,7 +1759,7 @@ export default function IndianScheduleView({
                   return (
                     <div className="text-center py-16 border border-dashed border-slate-900 rounded-2xl bg-slate-950/20">
                       <FileText className="w-10 h-10 text-slate-700 mx-auto mb-2" />
-                      <p className="text-slate-550 text-2xs italic">No matching notes found inside your Google Keep cabinet.</p>
+                      <p className="text-slate-400 text-2xs italic">No matching notes found inside your Google Keep cabinet.</p>
                       {tagToFilter || searchKeepQuery ? (
                         <button 
                           onClick={() => { setTagToFilter(null); setSearchKeepQuery(''); }}

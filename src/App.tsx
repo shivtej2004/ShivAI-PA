@@ -301,7 +301,10 @@ export default function App() {
   if (visitedLanding) {
     return (
       <LandingPage 
-        onStart={() => {
+        onStart={(customName) => {
+          if (customName) {
+            setProfile(prev => ({ ...prev, name: customName }));
+          }
           setVisitedLanding(false);
         }} 
       />
@@ -327,7 +330,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col md:flex-row font-sans leading-relaxed selection:bg-indigo-500 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#030712] text-slate-100 flex flex-col md:flex-row font-sans leading-relaxed selection:bg-indigo-500 selection:text-white relative overflow-y-auto md:overflow-hidden md:h-screen md:max-h-screen">
       
       {/* Decorative localized glows */}
       <div className="absolute -top-40 -left-40 w-[60%] h-[60%] rounded-full bg-indigo-500/10 blur-[150px] pointer-events-none apple-glow-orb" />
@@ -416,7 +419,7 @@ export default function App() {
       </aside>
 
       {/* Main Sandbox Dashboard Content Canvas */}
-      <main className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full overflow-x-hidden md:overflow-y-auto">
+      <main className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full overflow-y-auto overflow-x-hidden">
         <div className="max-w-6xl mx-auto space-y-6">
           
           {activeTab === 'dashboard' && (

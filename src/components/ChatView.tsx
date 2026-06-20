@@ -179,10 +179,10 @@ export default function ChatView({
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-210px)] max-h-[800px] animate-fade-in">
+    <div className="flex flex-col lg:grid lg:grid-cols-12 gap-6 lg:gap-8 h-[calc(100vh-260px)] sm:h-[calc(100vh-220px)] lg:h-[calc(100vh-195px)] max-h-[820px] w-full overflow-hidden animate-fade-in">
       
-      {/* Saved shortcut prompts rail (Left Sidebar) */}
-      <div className="lg:col-span-4 p-6 rounded-3xl border border-slate-900 bg-slate-900/10 backdrop-blur-md flex flex-col justify-between">
+      {/* Saved shortcut prompts rail (Left Sidebar - Hidden on mobile, shown on lg screens) */}
+      <div className="hidden lg:flex lg:col-span-4 p-6 rounded-3xl border border-slate-900 bg-slate-900/10 backdrop-blur-md flex-col justify-between overflow-y-auto">
         <div className="space-y-6">
           <div>
             <span className="text-2xs font-semibold text-indigo-400 uppercase tracking-widest bg-indigo-950/40 px-2 py-0.5 rounded border border-indigo-900/30">
@@ -264,8 +264,8 @@ export default function ChatView({
         </div>
       </div>
 
-      {/* Primary chat workspace window (Right side) */}
-      <div className="lg:col-span-8 p-6 rounded-3xl border border-slate-900 bg-slate-900/10 backdrop-blur-md flex flex-col justify-between overflow-hidden">
+      {/* Primary chat workspace window (Right side/Full width on mobile) */}
+      <div className="flex-1 lg:col-span-8 p-4 sm:p-6 rounded-3xl border border-slate-900 bg-slate-900/10 backdrop-blur-md flex flex-col justify-between overflow-hidden h-full">
         
         {/* Chat header context bar */}
         <div className="pb-4 border-b border-slate-900/80 flex justify-between items-center shrink-0">
@@ -274,29 +274,72 @@ export default function ChatView({
               <Cpu className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-sm font-semibold text-white block">Active Neural Conversator</span>
-              <span className="text-3xs text-emerald-400 font-mono">⚡ Gemini Powered - Node Active</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm font-semibold text-white block">Active Neural Conversator</span>
+                {isSpeaking && (
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75 animate-bounce"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
+                  </span>
+                )}
+              </div>
+              <span className="text-3xs text-emerald-400 font-mono block">⚡ Gemini Powered - Node Active</span>
             </div>
           </div>
-          <button
-            onClick={onClearHistory}
-            className="text-3xs font-semibold uppercase tracking-wider text-slate-500 hover:text-red-400 transition cursor-pointer"
-          >
-            Clear History
-          </button>
+          
+          <div className="flex items-center gap-3">
+            {/* Intelligent voice mode button on mobile directly */}
+            <button
+              onClick={() => setSoundOutputEnabled(!soundOutputEnabled)}
+              className={`p-1.5 sm:p-2 rounded-lg border text-3xs sm:text-2xs transition cursor-pointer flex items-center gap-1 lg:hidden ${
+                soundOutputEnabled 
+                  ? 'bg-purple-950/20 border-purple-800 text-purple-400' 
+                  : 'bg-slate-900/50 border-slate-800 text-slate-500 hover:text-slate-400'
+              }`}
+              title={soundOutputEnabled ? "Speak Answer" : "Silence Answer"}
+            >
+              {soundOutputEnabled ? <Volume2 className="w-3.5 h-3.5 text-purple-400" /> : <VolumeX className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">Speech</span>
+            </button>
+
+            <button
+              onClick={onClearHistory}
+              className="text-3xs font-semibold uppercase tracking-wider text-slate-500 hover:text-red-400 transition cursor-pointer bg-slate-900/40 p-1.5 px-2.5 rounded-lg border border-slate-800/60"
+            >
+              Clear
+            </button>
+          </div>
         </div>
 
         {/* Dynamic messages scroll area */}
-        <div className="flex-1 overflow-y-auto py-6 space-y-4 pr-1">
+        <div className="flex-1 overflow-y-auto py-4 sm:py-6 space-y-4 pr-1 scrollbar-thin">
           {messages.length === 0 ? (
-            <div className="h-full flex flex-col justify-center items-center text-center px-4 space-y-3">
-              <div className="p-4 bg-indigo-950/10 rounded-full text-indigo-400 border border-indigo-900/10">
-                <Sparkles className="w-8 h-8 opacity-60 animate-bounce" />
+            <div className="h-full flex flex-col justify-center items-center text-center px-4 space-y-4 my-auto">
+              <div className="p-4 bg-indigo-950/10 rounded-full text-indigo-400 border border-indigo-900/10 shrink-0">
+                <Sparkles className="w-7 h-7 opacity-60 animate-pulse" />
               </div>
-              <h4 className="font-sans font-bold text-slate-200">Consult Shiv Neural Core</h4>
-              <p className="text-xs text-slate-400 max-w-sm">
-                Ask productivity schedules, wellness guidance, code, resume structures, or finance optimization advice. Speak with me!
-              </p>
+              <div className="text-center">
+                <h4 className="font-sans font-bold text-slate-200 text-sm sm:text-base">Consult Shiv Neural Core</h4>
+                <p className="text-xs text-slate-400 max-w-sm mt-1">
+                  Ask productivity schedules, wellness guidance, code, resume structures, or finance optimization advice. Speak with me!
+                </p>
+              </div>
+
+              {/* Inline Presets Helper for Mobile Viewports */}
+              <div className="w-full max-w-md pt-4 space-y-2 lg:hidden">
+                <p className="text-[10px] text-slate-500 uppercase tracking-widest text-center font-bold">Suggested Prompts</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {PRESET_PROMPTS.map((prompt, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handlePresettedPrompt(prompt.text)}
+                      className="text-left p-3 rounded-xl bg-slate-900/40 border border-slate-800 text-[11px] text-slate-300 hover:bg-slate-800 hover:text-white transition cursor-pointer active:scale-95 block truncate"
+                    >
+                      <span className="font-semibold">{prompt.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           ) : (
             messages.map((msg) => (
@@ -305,7 +348,7 @@ export default function ChatView({
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs sm:text-sm leading-relaxed ${
                     msg.role === 'user'
                       ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
                       : 'bg-slate-900/60 border border-slate-800 text-slate-300 rounded-bl-none text-left'
@@ -322,7 +365,7 @@ export default function ChatView({
 
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-slate-900/60 border border-slate-800 text-slate-400 rounded-2xl rounded-bl-none px-4 py-3 text-sm flex items-center space-x-2.5">
+              <div className="bg-slate-900/60 border border-slate-800 text-slate-400 rounded-2xl rounded-bl-none px-4 py-3 text-xs flex items-center space-x-2.5">
                 <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
                 <span className="font-sans italic">Synthesizing Shiv's executive response...</span>
               </div>
@@ -332,36 +375,36 @@ export default function ChatView({
         </div>
 
         {/* Input prompt entry console */}
-        <form onSubmit={handleSubmit} className="pt-4 border-t border-slate-900 shrink-0 flex items-center gap-3">
+        <form onSubmit={handleSubmit} className="pt-4 border-t border-slate-900 shrink-0 flex items-center gap-2 sm:gap-3">
           
           {/* Animated voice capture toggle button */}
           <button
             type="button"
             onClick={toggleVoiceMode}
-            className={`p-3 rounded-2xl border transition cursor-pointer shrink-0 ${
+            className={`p-2.5 sm:p-3 rounded-2xl border transition cursor-pointer shrink-0 ${
               isListening 
                 ? 'bg-rose-950/20 border-rose-800 text-rose-400 animate-pulse' 
                 : 'bg-slate-900/40 border-slate-800 text-slate-400 hover:text-slate-300'
             }`}
             title="Toggle speech voice input"
           >
-            {isListening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+            {isListening ? <Mic className="w-4.5 h-4.5" /> : <MicOff className="w-4.5 h-4.5" />}
           </button>
 
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder={isListening ? "Listening... Speak naturally or type here..." : "Query Shiv on plan strategy, routines, coaching rules..."}
-            className="flex-1 px-4 py-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-500 font-sans focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+            placeholder={isListening ? "Listening... Speak naturally..." : "Ask Shiv coaching rules details..."}
+            className="flex-1 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs sm:text-sm text-slate-100 placeholder:text-slate-500 font-sans focus:outline-none focus:border-indigo-500"
           />
 
           <button
             type="submit"
             disabled={!inputText.trim() || loading}
-            className="p-3 rounded-2xl bg-indigo-500 hover:bg-indigo-600 text-white transition hover:scale-105 shrink-0 cursor-pointer disabled:opacity-50 disabled:scale-100"
+            className="p-2.5 sm:p-3 rounded-2xl bg-indigo-500 hover:bg-indigo-600 text-white transition hover:scale-105 shrink-0 cursor-pointer disabled:opacity-50 disabled:scale-100"
           >
-            <Send className="w-5 h-5" />
+            <Send className="w-4.5 h-4.5" />
           </button>
         </form>
 

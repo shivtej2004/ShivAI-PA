@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -172,7 +173,12 @@ export default function DashboardView({
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Prime Header Dashboard row */}
-      <div className="relative p-8 rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-3xl overflow-hidden shadow-2xl glass-panel-premium">
+      <motion.div 
+        className="relative p-8 rounded-3xl border border-white/10 bg-slate-950/40 backdrop-blur-3xl overflow-hidden shadow-2xl glass-panel-premium"
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+      >
         <div className="absolute -top-12 -right-12 w-80 h-80 rounded-full bg-indigo-500/10 blur-[80px] pointer-events-none" />
         <div className="absolute -bottom-16 -left-16 w-80 h-80 rounded-full bg-purple-500/10 blur-[90px] pointer-events-none" />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 z-10">
@@ -219,11 +225,16 @@ export default function DashboardView({
             )}
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Grid: Stats Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light">
+        <motion.div 
+          className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
           <span className="text-slate-400 font-sans text-2xs font-bold tracking-widest uppercase block mb-1">Task Complete Rate</span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="text-3xl font-display font-bold text-white tracking-tight">{taskCompletionRate}%</span>
@@ -235,9 +246,14 @@ export default function DashboardView({
               style={{ width: `${taskCompletionRate}%` }}
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light">
+        <motion.div 
+          className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+        >
           <span className="text-slate-400 font-sans text-2xs font-bold tracking-widest uppercase block mb-1">Best Habit Streak</span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="text-3xl font-display font-bold text-emerald-400 flex items-center gap-1.5 tracking-tight">
@@ -249,9 +265,14 @@ export default function DashboardView({
           <p className="text-2xs text-slate-400 mt-5 leading-relaxed font-light">
             Consistently trigger actions to keep streaks alive!
           </p>
-        </div>
+        </motion.div>
 
-        <div className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light">
+        <motion.div 
+          className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
           <span className="text-slate-400 font-sans text-2xs font-bold tracking-widest uppercase block mb-1">Water Tracker</span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="text-3xl font-display font-bold text-cyan-400 flex items-center gap-1.5 tracking-tight">
@@ -266,9 +287,14 @@ export default function DashboardView({
               style={{ width: `${Math.min(((profile.dailyWaterTarget + waterHydration) / (profile.dailyWaterTarget * 1.5)) * 100, 100)}%` }}
             />
           </div>
-        </div>
+        </motion.div>
 
-        <div className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light">
+        <motion.div 
+          className="p-6 rounded-2xl border border-white/5 bg-slate-900/15 backdrop-blur-lg hover:border-indigo-500/10 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:bg-slate-900/20 glass-panel-light"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.25 }}
+        >
           <span className="text-slate-400 font-sans text-2xs font-bold tracking-widest uppercase block mb-1">Current Mind State</span>
           <div className="flex items-baseline justify-between mt-2">
             <span className="text-2xl font-display font-semibold text-purple-400 flex items-center gap-1.5 tracking-tight">
@@ -292,14 +318,19 @@ export default function DashboardView({
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Triple Column Row: Quick Planner + Hydration/Habits + Google Calendar Integration Feed */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
         
         {/* Left Column: Tasks Agenda */}
-        <div className="xl:col-span-4 p-6 rounded-3xl border border-white/5 bg-slate-900/10 backdrop-blur-md space-y-6 flex flex-col justify-between glass-panel shadow-lg hover:border-white/10 transition-colors duration-300">
+        <motion.div 
+          className="xl:col-span-4 p-6 rounded-3xl border border-white/5 bg-slate-900/10 backdrop-blur-md space-y-6 flex flex-col justify-between glass-panel shadow-lg hover:border-white/10 transition-colors duration-300"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3 }}
+        >
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -388,10 +419,15 @@ export default function DashboardView({
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Middle Column: Quick Hydration log + Habits checkboxes */}
-        <div className="xl:col-span-4 p-6 rounded-3xl border border-white/5 bg-slate-900/10 backdrop-blur-md space-y-6 flex flex-col justify-between glass-panel shadow-lg hover:border-white/10 transition-colors duration-300">
+        <motion.div 
+          className="xl:col-span-4 p-6 rounded-3xl border border-white/5 bg-slate-900/10 backdrop-blur-md space-y-6 flex flex-col justify-between glass-panel shadow-lg hover:border-white/10 transition-colors duration-300"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35 }}
+        >
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
@@ -458,10 +494,15 @@ export default function DashboardView({
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Right Column: Google Calendar Integration Event Stream */}
-        <div className="xl:col-span-4 p-6 rounded-3xl border border-white/5 bg-slate-900/10 backdrop-blur-md space-y-6 flex flex-col justify-between glass-panel shadow-lg hover:border-white/10 transition-colors duration-300">
+        <motion.div 
+          className="xl:col-span-4 p-6 rounded-3xl border border-white/5 bg-slate-900/10 backdrop-blur-md space-y-6 flex flex-col justify-between glass-panel shadow-lg hover:border-white/10 transition-colors duration-300"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4 }}
+        >
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
@@ -522,10 +563,10 @@ export default function DashboardView({
                   {!authError && (
                     <button
                       onClick={() => forceSimulationMode()}
-                      className="text-[9px] px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-850 font-semibold text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-white/5 active:scale-95 shrink-0"
+                      className="text-[9px] px-2.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 font-semibold text-slate-300 uppercase tracking-wider transition-all cursor-pointer border border-white/5 active:scale-95 shrink-0"
                     >
                       Use Sandbox
-                    </button>
+                  </button>
                   )}
                 </div>
               </div>
@@ -572,7 +613,7 @@ export default function DashboardView({
             <span>Dynamic proxy sync agent</span>
             <span>v1.0.4 online</span>
           </div>
-        </div>
+        </motion.div>
       </div>
 
     </div>

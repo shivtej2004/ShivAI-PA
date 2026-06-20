@@ -116,7 +116,7 @@ export default function HabitsView({
               <div
                 key={cell.id}
                 className={`w-3.5 h-3.5 rounded-sm transition-all duration-200 ${
-                  cell.level === 0 ? 'bg-slate-900/80 border border-slate-850' :
+                  cell.level === 0 ? 'bg-slate-900/80 border border-slate-800' :
                   cell.level === 1 ? 'bg-indigo-950/60 border border-indigo-900/20' :
                   cell.level === 2 ? 'bg-indigo-700' : 'bg-purple-500'
                 }`}
@@ -159,7 +159,7 @@ export default function HabitsView({
                 return (
                   <div 
                     key={habit.id}
-                    className="p-5 rounded-2xl bg-slate-900/40 border border-slate-850 hover:border-slate-800 transition"
+                    className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 hover:border-slate-800 transition"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
                       <div>
@@ -193,7 +193,7 @@ export default function HabitsView({
                                 ? 'bg-indigo-500/10 border-indigo-500 text-indigo-400'
                                 : isToday
                                 ? 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'
-                                : 'bg-slate-950/40 border-slate-850 text-slate-500 hover:border-slate-800'
+                                : 'bg-slate-950/40 border-slate-800 text-slate-500 hover:border-slate-800'
                             }`}
                           >
                             <span className="text-4xs font-semibold text-slate-500 uppercase">{day.dayName}</span>

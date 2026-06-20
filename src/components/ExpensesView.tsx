@@ -229,7 +229,7 @@ export default function ExpensesView({
           
           {/* Liquidity metrics cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-850 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800 flex items-center justify-between">
               <div>
                 <span className="text-3xs uppercase text-slate-500 font-bold tracking-wider">Account Balance</span>
                 <span className={`text-2xl font-sans font-bold block mt-1 ${balance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -241,7 +241,7 @@ export default function ExpensesView({
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-850 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800 flex items-center justify-between">
               <div>
                 <span className="text-3xs uppercase text-slate-500 font-bold tracking-wider">Gross Inflows</span>
                 <span className="text-2xl font-sans font-bold block text-emerald-450 text-emerald-400 mt-1">
@@ -253,7 +253,7 @@ export default function ExpensesView({
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-850 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800 flex items-center justify-between">
               <div>
                 <span className="text-3xs uppercase text-slate-500 font-bold tracking-wider">Gross Spend</span>
                 <span className="text-2xl font-sans font-bold block text-rose-450 text-rose-450 text-rose-400 mt-1">
@@ -267,7 +267,7 @@ export default function ExpensesView({
           </div>
 
           {/* Budget safety indicator slider */}
-          <div className="p-4 rounded-2xl bg-slate-950/40 border border-slate-850/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl bg-slate-950/40 border border-slate-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex-1">
               <span className="text-3xs uppercase text-slate-500 font-bold tracking-wider block">Custom Monthly Allocation Cap</span>
               <span className="text-xs text-slate-350 block mt-1">Total spend cap: <strong>{cSymbol}{budgetLimit.toLocaleString()}</strong> ({cSymbol}{profile.dailyBudget}/day)</span>
@@ -331,7 +331,9 @@ export default function ExpensesView({
 
               <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
                 {transactions.length === 0 ? (
-                   <p className="text-slate-550 text-3xs italic py-8 text-center flex items-center justify-center gap-1"><AlertCircle className="w-3 text-slate-600"/>Your double-ledger sheet is empty.</p>
+                  <p className="text-slate-400 text-3xs italic py-8 text-center flex items-center justify-center gap-1">
+                    Your double-ledger sheet is empty.
+                  </p>
                 ) : (
                   transactions.slice(-10).reverse().map(trans => (
                     <div 

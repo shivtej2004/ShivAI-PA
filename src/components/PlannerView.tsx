@@ -146,15 +146,15 @@ export default function PlannerView({
           
           {/* Analytical header cards */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-850">
+            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800">
               <span className="text-3xs text-slate-500 font-sans uppercase font-bold tracking-wider">High Alerts</span>
               <span className="text-xl font-sans font-bold text-red-400 block mt-1">{highPriorityLeft} Open</span>
             </div>
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-850">
+            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800">
               <span className="text-3xs text-slate-500 font-sans uppercase font-bold tracking-wider">Completed</span>
               <span className="text-xl font-sans font-bold text-emerald-400 block mt-1">{completedTasks}</span>
             </div>
-            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-850">
+            <div className="p-3 rounded-xl bg-slate-900/40 border border-slate-800">
               <span className="text-3xs text-slate-500 font-sans uppercase font-bold tracking-wider">Completion</span>
               <span className="text-xl font-sans font-bold text-indigo-400 block mt-1">
                 {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%
@@ -208,7 +208,7 @@ export default function PlannerView({
                     className={`rounded-2xl border transition duration-150 overflow-hidden ${
                       task.completed 
                         ? 'bg-slate-950/20 border-slate-900/40 opacity-50' 
-                        : 'bg-slate-900/40 border-slate-850 hover:border-slate-800'
+                        : 'bg-slate-900/40 border-slate-800 hover:border-slate-800'
                     }`}
                   >
                     <div className="p-4 flex items-center justify-between gap-4">
