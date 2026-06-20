@@ -1,0 +1,6 @@
+{
+  "name": "ShivAI",
+  "description": "An Apple-inspired minimalist AI assistant localized for Indian daily schedules, offering complete Google Calendar and Google Tasks synchronization, Ayurvedic routine planning, masala chai detox countdowns, and Rupee currency tracking.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
